@@ -30,6 +30,7 @@
 Ces fichiers sont des symlinks vers `~/Source/agents-shared/` :
 
 - **Audit générique** : `docs/AUDIT-GENERIC.md`, complété par la checklist locale `docs/AUDIT.md`.
+- **Erreurs transverses** : `docs/ERREURS-GENERIC.md`, leçons génériques à ne pas reproduire.
 
 ## 🏛️ Architecture
 
@@ -78,12 +79,11 @@ toute la résolution et l'authentification restent au client Drive.
 
 ## ❌ Erreurs à ne pas reproduire
 
-- Icônes de types MIME et lookup GTK : `lookup_by_gicon` essaie le nom du
-  type MIME puis `application-x-generic`, et préfère, à distance égale,
-  le nom trouvé dans le thème actif à celui trouvé dans hicolor. Une
-  icône posée seulement dans hicolor n'apparaît donc jamais dans Nemo :
-  l'installer aussi dans le répertoire utilisateur du thème actif
-  (SVG + PNG 16-128 px via `gdk-pixbuf-thumbnailer`), couvert par `test.sh`.
+- Icônes de types MIME et thème GTK : leçon générique dans
+  `docs/ERREURS-GENERIC.md` (lookup_by_gicon préfère, à distance égale,
+  le nom trouvé dans le thème actif à celui trouvé dans hicolor).
+  Spécifique au projet : `install.sh` pose les SVG+PNG dans hicolor et
+  le thème actif détecté via gsettings — couvert par `test.sh`.
 - Icônes du client Drive vs types MIME : le client embarque
   `slides.svg` mais le type MIME officiel est `x-synology-drive-slide`
   (sans « s »). Normaliser le nom à l'installation et garder install /
