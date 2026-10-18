@@ -5,12 +5,15 @@ set -euo pipefail
 BIN="$HOME/.local/bin/syno-office-open"
 DESKTOP="$HOME/.local/share/applications/synology-office-handler.desktop"
 MIME_XML="$HOME/.local/share/mime/packages/x-synology-office.xml"
-ICONS="$HOME/.local/share/icons/hicolor/scalable/mimetypes"
 
 rm -f "$BIN" "$DESKTOP" "$MIME_XML"
-# Meme glob que install.sh : retire toutes les icones qu'il a pu poser
-# (y compris les noms normalises, ex. slide.svg renomme depuis slides.svg).
-rm -f "$ICONS"/application-x-synology-drive-*.svg
+# Icones posees par install.sh : dans hicolor ET dans le(s) theme(s)
+# actif(s) du moment de l'installation. Retirer de tous les themes
+# utilisateurs, SVG et PNG, noms normalises inclus (slide.svg).
+for theme_dir in "$HOME"/.local/share/icons/*/; do
+    rm -f "$theme_dir"scalable/mimetypes/application-x-synology-drive-*.svg
+    rm -f "$theme_dir"[0-9]*x*/mimetypes/application-x-synology-drive-*.png
+done
 rmdir "$HOME/.local/bin" 2>/dev/null || true
 
 update-mime-database "$HOME/.local/share/mime" 2>/dev/null || true

@@ -33,8 +33,9 @@ Ces fichiers sont des symlinks vers `~/Source/agents-shared/` :
 
 ## 🏛️ Architecture
 
-Petit projet shell sans build ni test automatisé, installé uniquement dans
-les répertoires utilisateur (`~/.local/...`). Chaîne d'ouverture :
+Petit projet sans build, installé uniquement dans les répertoires
+utilisateur (`~/.local/...`). Suite de tests automatisés : `./test.sh`,
+à relancer avant tout commit. Chaîne d'ouverture :
 
 ```
 double-clic .osheet
@@ -60,9 +61,9 @@ toute la résolution et l'authentification restent au client Drive.
 ### TDD
 - Approche par défaut pour les corrections et nouvelles fonctionnalités : écrire d'abord le test qui échoue, le voir échouer, puis corriger le code, puis revérifier (rouge/vert).
 - Chaque bug corrigé doit avoir son test de non-régression.
-- Cas particulier de ce projet : pas de harnais de test existant ; une
-  correction passe au minimum par une reproduction manuelle documentée
-  (commande exacte, comportement attendu vs observé) avant/après.
+- Si la zone modifiée n'est couverte par aucun test automatisé, exiger au
+  minimum une reproduction manuelle documentée (commande exacte,
+  comportement attendu vs observé) avant/après la correction.
 
 ### DRY
 - Éviter la répétition de code. Extraire les conditions répétées en fonctions helpers.
@@ -77,6 +78,12 @@ toute la résolution et l'authentification restent au client Drive.
 
 ## ❌ Erreurs à ne pas reproduire
 
+- Icônes de types MIME et lookup GTK : `lookup_by_gicon` essaie le nom du
+  type MIME puis `application-x-generic`, et préfère, à distance égale,
+  le nom trouvé dans le thème actif à celui trouvé dans hicolor. Une
+  icône posée seulement dans hicolor n'apparaît donc jamais dans Nemo :
+  l'installer aussi dans le répertoire utilisateur du thème actif
+  (SVG + PNG 16-128 px via `gdk-pixbuf-thumbnailer`), couvert par `test.sh`.
 - Icônes du client Drive vs types MIME : le client embarque
   `slides.svg` mais le type MIME officiel est `x-synology-drive-slide`
   (sans « s »). Normaliser le nom à l'installation et garder install /

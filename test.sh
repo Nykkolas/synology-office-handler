@@ -45,6 +45,14 @@ esac
 exit 0
 EOF
 printf '#!/bin/bash\nexit 0\n' > "$STUB_DIR/notify-send"
+cat > "$STUB_DIR/gsettings" <<'EOF'
+#!/bin/bash
+# Stub : renvoie un theme d'icones fixe pour des tests deterministes.
+case "$*" in
+    *icon-theme*) echo "'FakeTheme'" ;;
+    *) exit 1 ;;
+esac
+EOF
 chmod +x "$STUB_DIR"/*
 export PATH="$STUB_DIR:$PATH"
 
@@ -81,8 +89,12 @@ LAUNCHER="$PROJECT_DIR/syno-office-open"
 attend_un_echec "sans argument : refus" "$LAUNCHER"
 attend_un_echec "fichier inexistant : refus" "$LAUNCHER" "$HOME/absent.osheet"
 attend_un_echec "extension non geree : refus" "$LAUNCHER" /etc/hostname
+# Fichier .osheet valide obligatoire : le lanceur verifie l'extension AVANT
+# le client, un argument invalide ferait passer ce test pour la mauvaise
+# raison (rejet d'extension, pas absence du client).
+: > "$HOME/vide.osheet"
 attend_un_echec "client Drive absent : refus" \
-    env HOME="$SANDBOX/home2" "$LAUNCHER" "$LAUNCHER"
+    env HOME="$SANDBOX/home2" "$LAUNCHER" "$HOME/vide.osheet"
 
 # 2. Delegation au client Drive
 : > "$UI_LOG"
@@ -106,8 +118,9 @@ attend_un_succes "extension majuscule acceptee" \
 # 3. install.sh dans le HOME sable (fausses icones Drive embarquees)
 DRIVE_IMAGES="$HOME/.SynologyDrive/SynologyDrive.app/images"
 mkdir -p "$DRIVE_IMAGES"
+SVG_FAUX='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#00AA00"/></svg>'
 for nom in sheet doc slides; do
-    : > "$DRIVE_IMAGES/application-x-synology-drive-$nom.svg"
+    printf '%s\n' "$SVG_FAUX" > "$DRIVE_IMAGES/application-x-synology-drive-$nom.svg"
 done
 
 attend_un_succes "install.sh" "$PROJECT_DIR/install.sh"
@@ -131,6 +144,28 @@ grep -qF "Exec=$BIN %f" "$DESKTOP" \
 [ ! -e "$ICONS/application-x-synology-drive-slides.svg" ] \
     && ok "pas d'icone orpheline slides.svg" \
     || ko "icone orpheline slides.svg presente"
+
+# Icones posees aussi dans le repertoire utilisateur du theme actif :
+# GTK prefere, a distance egale, le nom trouve dans le theme actif au
+# nom specifique trouve dans hicolor ; sans cela, Nemo affiche
+# application-x-generic et jamais notre icone.
+THEME_ACTIF="$HOME/.local/share/icons/FakeTheme"
+[ -f "$THEME_ACTIF/scalable/mimetypes/application-x-synology-drive-sheet.svg" ] \
+    && ok "icone sheet dans le theme actif" \
+    || ko "icone sheet absente du theme actif"
+[ -f "$THEME_ACTIF/scalable/mimetypes/application-x-synology-drive-slide.svg" ] \
+    && ok "icone slide dans le theme actif (renommee)" \
+    || ko "icone slide absente du theme actif"
+if command -v gdk-pixbuf-thumbnailer >/dev/null 2>&1; then
+    [ -f "$THEME_ACTIF/16x16/mimetypes/application-x-synology-drive-sheet.png" ] \
+        && ok "PNG 16px genere pour le theme actif" \
+        || ko "PNG 16px manquant dans le theme actif"
+    [ -f "$THEME_ACTIF/96x96/mimetypes/application-x-synology-drive-slide.png" ] \
+        && ok "PNG 96px genere pour le theme actif (slide)" \
+        || ko "PNG 96px manquant dans le theme actif (slide)"
+else
+    ok "gdk-pixbuf-thumbnailer absent : PNG non testes"
+fi
 grep -q "synology-office-handler.desktop" "$HOME/.config/mimeapps.list" \
     && ok "associations par defaut enregistrees" \
     || ko "associations par defaut absentes"
@@ -140,10 +175,10 @@ attend_un_succes "uninstall.sh" "$PROJECT_DIR/uninstall.sh"
 [ ! -e "$BIN" ] && ok "lanceur retire" || ko "lanceur encore present"
 [ ! -e "$DESKTOP" ] && ok "entree desktop retiree" || ko "entree desktop encore presente"
 [ ! -e "$MIME_XML" ] && ok "types MIME retires" || ko "types MIME encore presents"
-if ls "$ICONS"/application-x-synology-drive-*.svg >/dev/null 2>&1; then
-    ko "icones residuelles : $(ls "$ICONS"/application-x-synology-drive-*.svg)"
+if find "$HOME/.local/share/icons" -name 'application-x-synology-drive-*' 2>/dev/null | grep -q .; then
+    ko "icones residuelles : $(find "$HOME/.local/share/icons" -name 'application-x-synology-drive-*')"
 else
-    ok "icones toutes retirees (aucune residuelle)"
+    ok "icones toutes retirees, tous themes confondus (aucune residuelle)"
 fi
 
 echo ""

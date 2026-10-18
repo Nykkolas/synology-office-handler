@@ -53,6 +53,14 @@ Le double-clic dans Nemo ouvre ensuite l'editeur dans le navigateur.
 - `install.sh` recupere au passage les icones SVG officielles du client
   (`application-x-synology-drive-*.svg`) pour l'affichage dans Nemo ;
   elles sont supprimees par `uninstall.sh`.
+- GTK resout l'icone d'un fichier en essayant le nom du type MIME puis
+  `application-x-generic` : a distance egale, le nom trouve dans le
+  theme actif gagne sur hicolor. Les icones sont donc posees a la fois
+  dans hicolor et dans le repertoire utilisateur du theme d'icones
+  actif (SVG scalable + PNG de 16 a 128 px via
+  `gdk-pixbuf-thumbnailer`), sans quoi Nemo n'affiche jamais l'icone
+  specifique. `slides.svg` est au passage renomme `slide.svg` pour
+  matcher le type MIME officiel.
 - Les types MIME declares reprennent les noms officiels utilises par
   Synology (`application/x-synology-drive-sheet`, etc.), identiques a
   ceux embarques dans le client (`~/.SynologyDrive/SynologyDrive.app/conf/`).
