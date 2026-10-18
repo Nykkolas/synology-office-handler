@@ -66,3 +66,11 @@ Le double-clic dans Nemo ouvre ensuite l'editeur dans le navigateur.
 ```
 ./uninstall.sh
 ```
+
+## Origine du code
+
+Ce projet a ete ecrit avec l'aide de Mistral Vibe (extension VS Code,
+version 1.26.0), agent de code IA. Le code n'a pas fait l'objet d'une
+relecture par un humain apres sa redaction : il est fourni tel quel,
+sans garantie d'aucune sorte. Lisez et verifiez les scripts avant de
+les executer ou de les reutiliser.
