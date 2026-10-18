@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Synology Office
+Name[fr]=Synology Office
+Comment=Ouvrir le fichier dans l'editeur Synology Office du NAS
+Comment[fr]=Ouvrir le fichier dans l'editeur Synology Office du NAS
+Exec=syno-office-open %f
+Icon=web-browser
+Terminal=false
+Categories=Network;Utility;
+MimeType=application/x-synology-drive-sheet;application/x-synology-drive-doc;application/x-synology-drive-slide;
+StartupNotify=false

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-synology-drive-sheet">
+    <comment>Feuille de calcul Synology Office</comment>
+    <comment xml:lang="fr">Feuille de calcul Synology Office</comment>
+    <glob pattern="*.osheet"/>
+  </mime-type>
+  <mime-type type="application/x-synology-drive-doc">
+    <comment>Document Synology Office</comment>
+    <comment xml:lang="fr">Document Synology Office</comment>
+    <glob pattern="*.odoc"/>
+  </mime-type>
+  <mime-type type="application/x-synology-drive-slide">
+    <comment>Presentation Synology Office</comment>
+    <comment xml:lang="fr">Presentation Synology Office</comment>
+    <glob pattern="*.oslides"/>
+  </mime-type>
+</mime-info>

@@ -1,0 +1,62 @@
+#!/bin/bash
+# syno-office-open - Ouvre un fichier Synology Office local dans l'editeur web.
+#
+# Le fichier .osheet/.odoc/.oslides est resolu et authentifie par le client
+# Synology Drive lui-meme (cloud-drive-ui --open-file), qui dispose deja de
+# la session vers le NAS. Ce lanceur ne stocke donc aucun identifiant et
+# n'interroge aucune API : il verifie le fichier puis delegue.
+#
+# Sous Flatpak, la commande doit passer par le bac a sable pour retrouver
+# l'environnement de l'instance deja lancee ; l'appel direct depuis l'hote
+# echoue (code 255) car l'UI ne parvient pas a joindre son daemon.
+
+set -euo pipefail
+
+APP_NAME="Synology Office"
+DRIVE_APP_DIR="$HOME/.SynologyDrive/SynologyDrive.app"
+UI_BIN="$DRIVE_APP_DIR/bin/cloud-drive-ui"
+FLATPAK_APP="com.synology.SynologyDrive"
+
+notify() {
+    command -v notify-send >/dev/null 2>&1 \
+        && notify-send -a "$APP_NAME" -u normal "$1" || true
+}
+
+die() {
+    notify "$1"
+    echo "erreur : $1" >&2
+    exit 1
+}
+
+[ "$#" -eq 1 ] || die "usage : syno-office-open <fichier .osheet/.odoc/.oslides>"
+
+fichier=$1
+[ -f "$fichier" ] || die "Fichier introuvable : $fichier"
+
+case "${fichier,,}" in
+    *.osheet|*.odoc|*.oslides) ;;
+    *) die "Extension non geree : $fichier (attendu : .osheet, .odoc ou .oslides)" ;;
+esac
+
+[ -x "$UI_BIN" ] || die "Synology Drive Client introuvable ($UI_BIN).
+Installez le client puis reessayez."
+
+fichier_absolu=$(realpath "$fichier")
+
+use_flatpak=0
+if command -v flatpak >/dev/null 2>&1; then
+    if flatpak info "$FLATPAK_APP" >/dev/null 2>&1 \
+            || [ -d "$HOME/.local/share/flatpak/app/$FLATPAK_APP" ] \
+            || [ -d "/var/lib/flatpak/app/$FLATPAK_APP" ]; then
+        use_flatpak=1
+    fi
+fi
+
+if [ "$use_flatpak" -eq 1 ]; then
+    exec flatpak run --command=sh "$FLATPAK_APP" -c \
+        "exec env LD_LIBRARY_PATH='$DRIVE_APP_DIR/lib/' '$UI_BIN' --open-file \"\$@\"" \
+        sh "$fichier_absolu"
+fi
+
+# Client installe hors Flatpak (paquet .deb/.rpm) : appel direct.
+exec env "LD_LIBRARY_PATH=$DRIVE_APP_DIR/lib/" "$UI_BIN" --open-file "$fichier_absolu"
