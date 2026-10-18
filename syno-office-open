@@ -9,6 +9,8 @@
 # Sous Flatpak, la commande doit passer par le bac a sable pour retrouver
 # l'environnement de l'instance deja lancee ; l'appel direct depuis l'hote
 # echoue (code 255) car l'UI ne parvient pas a joindre son daemon.
+#
+# Teste avec Synology Drive Client 4.2.0 (Flatpak), DSM 7, 2FA activee.
 
 set -euo pipefail
 
