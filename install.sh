@@ -29,11 +29,16 @@ sed "s|^Exec=.*|Exec=$BIN_DIR/syno-office-open %f|" \
 # 3. Types MIME
 install -m 0644 "$PROJECT_DIR/x-synology-office.xml" "$MIME_DIR/x-synology-office.xml"
 
-# 4. Icones du client Drive, si disponible (meilleurs reperes visuels)
+# 4. Icones du client Drive, si disponible (meilleurs reperes visuels).
+# Le client embarque "slides.svg" mais le type MIME officiel est
+# x-synology-drive-slide (sans s) : normaliser le nom pour que le
+# gestionnaire de fichiers retrouve l'icone (recherche par type MIME).
 if [ -d "$DRIVE_IMAGES" ]; then
     for svg in "$DRIVE_IMAGES"/application-x-synology-drive-*.svg; do
         [ -f "$svg" ] || continue
-        install -m 0644 "$svg" "$ICON_DIR/"
+        nom="$(basename "$svg")"
+        nom="${nom/slides.svg/slide.svg}"
+        install -m 0644 "$svg" "$ICON_DIR/$nom"
     done
 fi
 

@@ -67,6 +67,16 @@ Le double-clic dans Nemo ouvre ensuite l'editeur dans le navigateur.
 ./uninstall.sh
 ```
 
+## Tests
+
+```
+./test.sh
+```
+
+Suite de tests fonctionnels dans un HOME sable (faux client Drive,
+stub flatpak) : chemins d'erreur du lanceur, delegation, et symetrie
+complete install/uninstall. Aucun fichier de la machine n'est touche.
+
 ## Origine du code
 
 Ce projet a ete ecrit avec l'aide de Mistral Vibe (extension VS Code,
